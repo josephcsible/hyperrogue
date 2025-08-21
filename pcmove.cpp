@@ -48,6 +48,8 @@ EX int  cheater = 0;
 /** \brief lands visited -- unblock some modes */
 EX bool landvisited[landtypes];
 
+EX bool celldistchallenge = false;
+
 EX int noiseuntil; // noise until the given turn
 
 EX void createNoise(int t) { 
@@ -1108,7 +1110,11 @@ bool pcmove::move_if_okay() {
 
 void pcmove::tell_why_impassable() {
   cell*& c2 = mi.t;
-  if(nonAdjacentPlayer(cwt.at,c2)) {
+  if(celldistchallenge && celldist(c2) <= celldist(cwt.at)) {
+    if(vmsg(miRESTRICTED, siUNKNOWN, nullptr, moNone))
+      addMessage(XLAT("You need to keep moving away."));
+    }
+  else if(nonAdjacentPlayer(cwt.at,c2)) {
     if(vmsg(miRESTRICTED, siWARP, c2, moNone)) addMessage(geosupport_football() < 2 ?
       XLAT("You cannot move between the cells without dots here!") :
       XLAT("You cannot move between the triangular cells here!")

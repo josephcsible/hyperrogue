@@ -197,6 +197,9 @@ EX bool passable(cell *w, cell *from, flagtype flags) {
   else if(w->monst && isFriendly(w) && F(P_FRIENDSWAP)) ;
   else if(w->monst && !F(P_MONSTER)) return false;
 
+  if(celldistchallenge && (flags & P_ISPLAYER) && from && celldist(w) <= celldist(from))
+    return false;
+
   if(w->wall == waMirror || w->wall == waCloud) 
     return F(P_MIRROR | P_AETHER);
   
