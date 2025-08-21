@@ -296,6 +296,16 @@ EX void switchHardcore() {
   if(pureHardcore()) popScreenAll();
   }
 
+EX void switchCelldistchallenge() {
+  if(celldistchallenge) {
+      celldistchallenge = false;
+      addMessage(XLAT("Celldist challenge off!"));
+  } else {
+      celldistchallenge = true;
+      addMessage(XLAT("Celldist challenge on!"));
+  }
+}
+
 EX void switch_casual() {
   if(savecount > 0) {
     dialog::push_confirm_dialog([] {
@@ -760,6 +770,9 @@ EX void showChangeMode() {
     }
   if(getcstat == 'h')
     mouseovers = XLAT("One wrong move and it is game over!");
+
+  dialog::addSelItem(XLAT("celldist challenge"), ONOFF(celldistchallenge), 'd');
+  dialog::add_action(switchCelldistchallenge);
   
   multi::cpid = 0;
   menuitem_land_structure('l');

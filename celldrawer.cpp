@@ -706,7 +706,12 @@ void celldrawer::tune_colors() {
 
   aura_color = fcol;
 
-  if(peace::on && peace::hint && (c->land != laTortoise || !tortoise::shading_on())) {
+  if(celldistchallenge) {
+    if(celldist(c) <= celldist(cwt.at)) {
+      wcol = gradient(wcol, 0, 0, .7, 1);
+      fcol = gradient(fcol, 0, 0, .7, 1);
+    }
+  } else if(peace::on && peace::hint && (c->land != laTortoise || !tortoise::shading_on())) {
     int d =
       (c->land == laCamelot || (c->land == laCaribbean && celldistAlt(c) <= 0) || (c->land == laPalace && celldistAlt(c))) ? celldistAlt(c):
       celldist(c);
