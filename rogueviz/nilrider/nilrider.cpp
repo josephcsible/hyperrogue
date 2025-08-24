@@ -276,6 +276,7 @@ void run() {
   show_button(PSEUDOKEY_MENU, "menu");
 
   dialog::add_key_action(PSEUDOKEY_MENU, [] {
+    if(tour::on) { tour::next_slide(); return; }
     if(curlev->current.timer) paused = true;
     game_keys_scroll = true;
     pushScreen(main_menu);
@@ -726,12 +727,7 @@ bool on;
 local_parameter_set lps_nilrider("nilrider:");
 
 void nilrider_keys() {
-  #if CAP_SDL2
-  multi::change_default_key(lps_nilrider, SDL_SCANCODE_LCTRL, 16 + nrFineControl);
-  #else
-  multi::change_default_key(lps_nilrider, SDLK_LCTRL, 16 + nrFineControl);
-  #endif
-
+  multi::change_default_key(lps_nilrider, SDL12(SDLK_LCTRL, SDL_SCANCODE_LCTRL), 16 + nrFineControl);
   multi::change_default_key(lps_nilrider, SDL12('p', SDL_SCANCODE_P), 16 + nrPause);
   multi::change_default_key(lps_nilrider, SDL12('b', SDL_SCANCODE_B), 16 + nrReverseTime);
   multi::change_default_key(lps_nilrider, SDL12('r', SDL_SCANCODE_R), 16 + nrViewSimulation);
@@ -841,6 +837,20 @@ void initialize_all() {
   poly_outline = 0xFF;
   pushScreen(pick_game);
   start_game();
+  }
+
+void initialize_for_slide(tour::presmode mode) {
+  setWhiteCanvas(mode, [] { set_geometry(gNil); set_variation(eVariation::pure); });
+  if(mode == tour::pmStart) {
+    tour::slide_backup(pmodel, mdGeodesic);
+    tour::slide_backup(nisot::geodesic_movement, true);
+    lps_enable(&lps_nilrider);
+    tour::slide_backup(poly_outline, 0xFF);
+    stop_game();
+    initialize();
+    start_game();
+    }
+  if(mode == tour::pmStop) lps_enable(nullptr);
   }
 
 auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] { planning_mode = true; }) + arg::add3("-viewsim", [] { view_replay = true; })

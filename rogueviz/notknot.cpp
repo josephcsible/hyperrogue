@@ -1113,6 +1113,18 @@ struct hrmap_notknot : hrmap {
     return adj(c->master, i);
     }
     
+  int shvid(cell *c) override {
+    dynamicval<eGeometry> g(geometry, base);
+    dynamicval<hrmap*> m(currentmap, euc);
+    return currentmap->shvid(all[indices[c->master]]->where->c7);
+    }
+
+  subcellshape& get_cellshape(cell* c) override {
+    dynamicval<eGeometry> g(geometry, base);
+    dynamicval<hrmap*> m(currentmap, euc);
+    return currentmap->get_cellshape(all[indices[c->master]]->where->c7);
+    }
+
   ~hrmap_notknot() {
     for(auto uc: all) {
       if(uc && uc->result) {
@@ -1426,7 +1438,7 @@ void portal_slideshow(tour::ss::slideshow_callback cb) {
 
   if(portal_slides.empty()) {
 
-    portal_slides.emplace_back(slide{"portal collection", 100, LEGAL::NONE | QUICKSKIP,
+    portal_slides.emplace_back(slide{"Portal Collection", 100, LEGAL::NONE | QUICKSKIP,
        "This is a collection of portals. We start with knotted portals in Euclidean geometry, "
        "then we visit portals in other geometries, and finally, we explore portals between different "
        "geometries.\n\nLoading these may take some time, so you need to press 'r' to run them. In most slides you can also press '5' to change various parameters.",
@@ -1587,8 +1599,14 @@ auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
     ->set_reaction(regenerate);
     param_i(loop_any, "nk_loopany");
     })
+  + addHook(hooks_generate_faces, 100, [] (geometry_information *gi) {
+      if(geometry != gNotKnot) return false;
+      dynamicval<eGeometry> b(geometry, base);
+      gi->generate_faces();
+      return true;
+      })
 #ifndef NOTKNOT
-+ addHook_slideshows(120, portal_slideshow)
++ addHook_slideshows(20, portal_slideshow)
 #endif
   ;
 
