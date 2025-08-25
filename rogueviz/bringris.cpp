@@ -1282,6 +1282,7 @@ void create_game();
 
 void geometry_menu() {
   clearMessages();
+  cmode = sm::VR_MENU | sm::NOSCR; gamescreen();
   dialog::init("Bringris geometries");
   dialog::addBreak(100);
   int total_stars = 0;
@@ -1398,7 +1399,7 @@ void visual_menu() {
   }
   
 void settings_menu() {
-  emptyscreen();
+  cmode = sm::VR_MENU | sm::NOSCR; gamescreen();
   dialog::init("Bringris settings");
   dialog::addItem("alternative geometry", 'g');
   dialog::add_action_push(geometry_menu);
@@ -1429,7 +1430,7 @@ void settings_menu() {
 bool hi_pro;
 
 void hiscore_menu() {
-  emptyscreen();
+  cmode = sm::VR_MENU | sm::NOSCR; gamescreen();
   dialog::init("High scores");
   string s = bgeoms[bgeom].name;
   if(cur.max_piece != bgeoms[bgeom].default_max_piece) s = s + " (block " + its(cur.max_piece) + ")";
@@ -1445,7 +1446,7 @@ void hiscore_menu() {
   for(auto ad: v) {
     dialog::addSelItem(ad->myname, hi_pro ? fts(ad->score) : its(ad->completed), dialog::list_fake_key++);
     dialog::add_action_push([ad] {
-      emptyscreen();
+      cmode = sm::VR_MENU | sm::NOSCR; gamescreen();
       dialog::init();
       if(hi_pro) dialog::addSelItem("score", fts(ad->score), 's');
       dialog::addSelItem("levels", fts(ad->completed), 'l');
