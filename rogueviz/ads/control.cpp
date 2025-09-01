@@ -1,3 +1,6 @@
+// Relative Hell: control for the anti-de Sitter game
+// Copyright (C) 2022-2025 Zeno Rogue, see '../../hyper.cpp' for details
+
 namespace hr {
 
 namespace ads_game {
@@ -164,7 +167,7 @@ bool ads_turn(int idelta) {
 
   auto& act = multi::action_states[1];
 
-  if(act[multi::pcFire].pressed() && !paused) fire();
+  if(act[multi::pcFire].pressed() && !paused && !game_over) fire();
   if(act[pcPause].pressed()) switch_pause();
   if(act[pcDisplayTimes].pressed()) view_proper_times = !view_proper_times;
   if(act[pcSwitchSpin].pressed()) auto_rotate = !auto_rotate;
