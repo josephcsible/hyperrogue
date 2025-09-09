@@ -34,6 +34,7 @@ constexpr flagtype SF_ZFOG         = 65536;
 constexpr flagtype SF_ODSBOX       = (1<<17);
 
 constexpr flagtype SF_SEMIDIRECT   = (1<<18);
+constexpr flagtype SF_NONSPATIAL   = (1<<19);
 #endif
 
 EX bool solv_all;
@@ -256,7 +257,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     }        
   else if(among(pmodel, mdDisk, mdBall) && GDIM == 2 && vrhr::rendering() && !sphere && !(hyperbolic && pconf.alpha < 0 && pconf.alpha > -1)) {
     shader_flags |= SF_DIRECT | SF_BOX;
-    vsh += "uniform mediump float uAlpha, uDepth, uDepthScaling, uCamera;";
+    vsh += "uniform mediump float uDepth, uAlpha, uDepthScaling, uCamera;";
     
     if(hyperbolic) coordinator += 
       "float zlev = sqrt(t.z*t.z-t.x*t.x-t.y*t.y);\n"
@@ -296,12 +297,12 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     treset = true;
     }
   else if(pmodel == mdConformalSquare && pconf.model_transition == 1) {
-    shader_flags |= SF_ORIENT | SF_DIRECT;
+    shader_flags |= SF_ORIENT | SF_DIRECT | SF_NONSPATIAL;
     coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
     coordinator += "t = to_square(t);";
     }
-  else if(pmodel == mdBand && hyperbolic) {
-    shader_flags |= SF_BAND | SF_ORIENT | SF_BOX | SF_DIRECT;
+  else if(pmodel == mdBand && hyperbolic && pconf.model_transition == 1) {
+    shader_flags |= SF_BAND | SF_ORIENT | SF_BOX | SF_DIRECT | SF_NONSPATIAL;
     coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
     if(dim2) coordinator += "mediump float zlev = zlevel(t); t /= zlev;\n";
     if(dim3) coordinator += "mediump float r = sqrt(t.y*t.y+t.z*t.z); float ty = asinh(r);\n";
@@ -311,8 +312,26 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     if(dim3) coordinator += "t[0] = tx; t[1] = ty*t.y/r; t[2] = ty*t.z/r; t[3] = 1.0;\n";
     if(dim3) shader_flags |= SF_ZFOG;
     }
+  else if(pmodel == mdEquidistant && hyperbolic) {
+    shader_flags |= SF_BOX | SF_DIRECT;
+    coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
+    if(dim3) {
+      coordinator += "mediump float d = length(t.xyz); if(d > 0.) t.xyz *= asinh(d) / d / 2.; t[3] = 1.;\n";
+      }
+    else if(!spatial_graphics) {
+      coordinator += "mediump float d = length(t.xy); if(d > 0.) t.xy *= asinh(d) / d / 2.; t[2] = 0.; t[3] = 1.;\n";
+      }
+    else {
+      coordinator += "mediump float zlev = zlevel(t); t /= zlev;\n";
+      coordinator += "mediump float rad = length(t.xy);\n";
+      coordinator += "mediump float d = asinh(rad);\n";
+      coordinator += "mediump float df, zf; hypot_zlev(zlev, d, df, zf);\n";
+      coordinator += "if(d > 0.) t.xy *= d * df / rad / 2.; t[2] = 0.; t[3] = 1.;\n";
+      }
+    if(dim3) shader_flags |= SF_ZFOG;
+    }
   else if(pmodel == mdHalfplane && hyperbolic) {
-    shader_flags |= SF_HALFPLANE | SF_ORIENT | SF_BOX | SF_DIRECT;
+    shader_flags |= SF_HALFPLANE | SF_ORIENT | SF_BOX | SF_DIRECT | SF_NONSPATIAL;
     if(dim2) shader_flags |= SF_USE_ALPHA;
     coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
     if(dim2) coordinator += 
@@ -324,6 +343,27 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
       "t.xyz /= (t.w + 1.0); t.y += 1.0;\n"
       "mediump float rads = dot(t.xyz, t.xyz);\n"
       "t.xyz /= -rads; t[3] = 1.0;\n";        
+    if(dim3) shader_flags |= SF_ZFOG;
+    }
+  else if(pmodel == mdConformalEgg && hyperbolic) {
+    shader_flags |= SF_ORIENT | SF_BOX | SF_DIRECT;
+    coordinator += "t = uPP * t; ", vsh += "uniform mediump mat4 uPP;";
+    coordinator += dim2 ? "t /= 1. + t.z;\n" : "t /= 1. + t.w;\n";
+    if(pconf.model_transition == 1)
+    coordinator +=
+      "mediump float mul = 1./9.;\n";
+    else {
+      vsh += "uniform mediump float uModelTrans;";
+      coordinator +=
+        "mediump float mul = (1./9.) * uModelTrans;\n";
+      }
+    coordinator +=
+      "mediump float txx = t.x * t.x;\n"
+      "mediump float tyy = t.y * t.y;\n"
+      "t.x = t.x + t.x * (txx - 3.*tyy) * mul;\n"
+      "t.y = t.y + t.y * (3.*txx - tyy) * mul;\n"
+      "t.w = 1.;\n";
+    if(dim2) coordinator += "t.z = 0.;\n";
     if(dim3) shader_flags |= SF_ZFOG;
     }
   else if(pmodel == mdLiePerspective) {
@@ -615,6 +655,8 @@ void display_data::set_projection(int ed, ld shift) {
   if(in_h2xe()) id |= 1;
   if(in_s2xe()) id |= 2;
   if(WDIM == 2 && GDIM == 3 && hyperbolic && context_fog && cgi.emb->is_same_in_same()) id |= 1;
+  id <<= 1; id |= (spatial_graphics ? 1 : 0);
+  id <<= 1; id |= (pconf.model_transition == 1) ? 0 : 1;
   shared_ptr<glhr::GLprogram> selected;
 
   if(matched_programs.count(id)) selected = matched_programs[id];
@@ -816,6 +858,9 @@ void display_data::set_projection(int ed, ld shift) {
   if(selected->uDepth != -1)
     glUniform1f(selected->uDepth, vid.depth);
 
+  if(selected->uModelTrans != -1)
+    glUniform1f(selected->uModelTrans, pconf.model_transition);
+
   if(selected->uCamera != -1)
     glUniform1f(selected->uCamera, vid.camera);
 
@@ -857,9 +902,20 @@ void display_data::set_projection(int ed, ld shift) {
     }
   }
 
-EX void add_if(string& shader, const string& seek, const string& function) {
-  if(shader.find(seek) != string::npos)
+EX bool add_if(string& shader, const string& seek, const string& function) {
+  if(shader.find(seek) != string::npos) {
     shader = function + shader;
+    return true;
+    }
+  return false;
+  }
+
+EX bool add_if_not(string& shader, const string& seek, const string& function) {
+  if(shader.find(seek) == string::npos) {
+    shader = function + shader;
+    return true;
+    }
+  return false;
   }
 
 EX void add_fixed_functions(string& shader) {
@@ -926,6 +982,21 @@ EX void add_fixed_functions(string& shader) {
     "return ((1.0 + (e2 / 24.0 - 0.1 - 3.0 * e3 / 44.0) * e2+ e3 / 14.) / sqrt(mean));\n"
     "}\n");
 
+  if(hyperbolic) add_if(shader, "hypot_zlev",
+    "void hypot_zlev(in mediump float zlev, inout mediump float d, out mediump float df, out mediump float zf) {\n"
+    "  mediump float z = factor_to_lev(zlev);\n"
+    "  mediump float tz = sinh(z);\n"
+    "  mediump float td = sinh(d) * cosh(z);\n"
+    "  mediump float h = length(vec2(tz, td));\n"
+    "  zf = tz / h; df = td / h;\n"
+    "  d = acosh(cosh(d) * cosh(z));\n"
+    "  }\n"
+    );
+
+  if(hyperbolic) add_if(shader, "factor_to_lev",
+    "mediump float factor_to_lev(mediump float zlev) { return uDepth - atanh(tanh(uDepth) / zlev); }\n"
+    ) && add_if_not(shader, "float uDepth", "uniform mediump float uDepth;\n");
+
   add_if(shader, "tanh", "mediump float tanh(mediump float x) { return sinh(x) / cosh(x); }\n");
   add_if(shader, "sinh", "mediump float sinh(mediump float x) { return (exp(x) - exp(-x)) / 2.0; }\n");
   add_if(shader, "asin_clamp", "mediump float asin_clamp(mediump float x) { return x > 1. ? PI/2. : x < -1. ? -PI/2. : asin(x); }\n");
@@ -933,6 +1004,7 @@ EX void add_fixed_functions(string& shader) {
   add_if(shader, "asinh", "mediump float asinh(mediump float x) { return log(sqrt(x*x + 1.0) + x); }\n");
   add_if(shader, "acosh", "mediump float acosh(mediump float x) { return log(sqrt(x*x - 1.0) + x); }\n");
   add_if(shader, "atanh", "mediump float atanh(mediump float x) { return (log(1.+x)-log(1.-x))/2.; }\n");
+  // probably also if(hyperbolic)
   add_if(shader, "zlevel", "mediump float zlevel(mediump vec4 h) { return (h[2] < 0.0 ? -1.0 : 1.0) * sqrt(h[2]*h[2] - h[0]*h[0] - h[1]*h[1]); }\n");  
   add_if(shader, "atan2", "mediump float atan2(mediump float y, mediump float x) {\n"
     "if(x == 0.) return y > 0. ? PI/2. : -PI/2.;\n"
