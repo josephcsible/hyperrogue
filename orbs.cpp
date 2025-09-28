@@ -139,6 +139,7 @@ EX void reduceOrbPowers() {
   reverse_curse(itCurseWater, itOrbFire, true); // OK
   reverse_curse(itCurseDraining, itOrbTime, false); // OK
   reverse_curse(itCurseGluttony, itOrbChoice, true); // OK
+  reverse_curse(itCurseAnimosity, itOrbEmpathy, false); // OK
     
   if(haveMount()) markOrb(itOrbDomination);
   for(int i=0; i<ittypes; i++) 
@@ -215,6 +216,7 @@ EX void reduceOrbPowers() {
   reduceOrbPower(itCurseFatigue, 199);
   reduceOrbPower(itCurseRepulsion, 199);
   reduceOrbPower(itCurseGluttony, 199);
+  reduceOrbPower(itCurseAnimosity, 199);
 
   #if CAP_COMPLEX2
   mine::auto_teleport_charges();
@@ -1840,6 +1842,9 @@ EX int orbcharges(eItem it) {
       return 30;
        
     case itCurseGluttony:
+      return 30;
+       
+    case itCurseAnimosity:
       return 30;
        
     default:

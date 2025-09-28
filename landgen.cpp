@@ -295,7 +295,7 @@ EX int rebalance_treasure(int x, int y, eLand l) {
   }
 
 EX eItem random_curse() {
-  return pick(itCurseWeakness, itCurseDraining, itCurseWater, itCurseFatigue, itCurseRepulsion, itCurseGluttony);
+  return pick(itCurseWeakness, itCurseDraining, itCurseWater, itCurseFatigue, itCurseRepulsion, itCurseGluttony, itCurseAnimosity);
   }
 
 EX void clear_item(cell *c) {
@@ -2726,7 +2726,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           switches = (switches + 1) / 3;
           
           if((border || switches > 2) && hrand(100) < 50)
-            c->item = pick(itCurseWeakness, itCurseDraining, itCurseWater, itCurseFatigue, itCurseRepulsion, itCurseGluttony);
+            c->item = pick(itCurseWeakness, itCurseDraining, itCurseWater, itCurseFatigue, itCurseRepulsion, itCurseGluttony, itCurseAnimosity);
           }
 
         if(!c->item && c->wall == waNone && hrand(2000) < 100 + PT(kills[moHexer], 50) && notDippingFor(itCursed))

@@ -974,6 +974,7 @@ EX void applyBoxes() {
   applyBoxI(itCurseRepulsion, true);
   applyBoxI(itCurseGluttony, true);
   applyBoxI(itCurseWater, true);
+  applyBoxI(itCurseAnimosity, true);
   list_invorb();
 
   applyBoxEnum(bow::weapon, "weapon choice");

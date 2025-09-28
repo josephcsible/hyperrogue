@@ -1696,6 +1696,11 @@ ITEM('c', 0xD08080, "Curse of Gluttony", itCurseGluttony, IC_ORB, IF_CURSE, RESE
   "The first item you pick up is consumed without any effect."
   )
 
+ITEM('c', 0x00C060, "Curse of Animosity", itCurseAnimosity, IC_ORB, IF_CURSE, RESERVED, osFriend, 
+  "This Orb lets your enemies share your Orb powers.\n\n"
+  "The following Orbs are affected:"
+  )
+
 ITEM('>', 0xFF6060, "fatigue", itFatigue, IC_NAI, ZERO, RESERVED, osNone, 
     "See the Curse of Fatigue."
     )
