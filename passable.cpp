@@ -79,6 +79,9 @@ EX bool checkflags(flagtype flags, flagtype x) {
   if(flags & P_ISFRIEND) if(items[itOrbEmpathy]) 
     if(checkflags(flags ^ P_ISPLAYER ^ P_ISFRIEND, x) && markOrb(itOrbEmpathy))
       return true;
+  if(!(flags & (P_ISPLAYER|P_ISFRIEND))) if(items[itCurseAnimosity]) 
+    if(checkflags(flags ^ P_ISPLAYER, x) && markOrb(itCurseAnimosity))
+      return true;
   return false;
   }
 
@@ -433,7 +436,7 @@ EX void moveBoat(const movei& mi) {
 
 EX void moveBoatIfUsingOne(const movei& mi) {
   if(mi.s->wall == waBoat && isWatery(mi.t)) moveBoat(mi);
-  else if(mi.s->wall == waBoat && boatGoesThrough(mi.t) && isFriendly(mi.t) && markEmpathy(itOrbWater)) {
+  else if(mi.s->wall == waBoat && boatGoesThrough(mi.t) && (isFriendly(mi.t) ? markEmpathy(itOrbWater) : markAnimosity(itOrbWater))) {
     placeWater(mi.t, mi.s);
     moveBoat(mi);
     }

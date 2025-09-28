@@ -1325,7 +1325,7 @@ EX void stabbingAttack(movei mi, eMonster who, int bonuskill IS(0)) {
     if(stabthere && (items[itOrbThorns] || !out) && canAttack(mt,who,c,c->monst,AF_STAB)) {
       changes.ccell(c);
       if(c->monst != moHedge || out) {
-        markOrb(itOrbThorns); if(who != moPlayer) markOrb(itOrbEmpathy);
+        markOrb(itOrbThorns); if(who != moPlayer) markOrb(isFriendly(who) ? itOrbEmpathy : itCurseAnimosity);
         }
       eMonster m = c->monst;
       int k = tkills();

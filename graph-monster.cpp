@@ -450,7 +450,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       }
     
     case moEvilGolem: case moIceGolem: {
-      const shiftmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 2, 0xC0), m, footphase);
+      const shiftmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 2, 0xC0), items[itOrbFish] && items[itCurseAnimosity] ? moWaterElemental : m, footphase);
       ShadowV(V, cgi.shPBody);
       queuepoly(VBS, cgi.shPBody, darkena(col, 0, 0XC0));
       queuepoly(VHEAD, cgi.shGolemhead, darkena(col, 1, 0XFF));
@@ -472,7 +472,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       bool wears_dress = among(id, pshRogue, pshRatling, pshSkeleton);
 
       ShadowV(V, body);
-      const transmatrix VBS = otherbodyparts(V, facecolor, !evil && items[itOrbFish] && items[itOrbEmpathy] ? moWaterElemental : m, footphase);
+      const transmatrix VBS = otherbodyparts(V, facecolor, items[itOrbFish] && items[evil ? itCurseAnimosity : itOrbEmpathy] ? moWaterElemental : m, footphase);
       queuepoly(VBODY * VBS, body, facecolor);
   
       if(m == moPrincessArmed) 
@@ -1839,7 +1839,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
     if(!nospins && c->mondir < c->type) Vs = Vs * ddspin180(c, c->mondir);
     if(c->monst == moPair) Vs = Vs * xpush(-.12);
     if(c->monmirror) Vs = Vs * lmirror();
-    if(isFriendly(c)) drawPlayerEffects(Vs, Vparam, c, c->monst);
+    drawPlayerEffects(Vs, Vparam, c, c->monst);
     res = res && drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase, asciicol);
     }
 

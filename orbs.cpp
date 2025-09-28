@@ -32,6 +32,20 @@ EX bool markEmpathy2(eItem it) {
   return true;
   }
 
+EX bool markAnimosity(eItem it) {
+  if(!items[itCurseAnimosity]) return false;
+  if(!markOrb(it)) return false;
+  markOrb(itCurseAnimosity);
+  return true;
+  }
+
+EX bool markAnimosity2(eItem it) {
+  if(items[itCurseAnimosity] < 2) return false;
+  if(!markOrb2(it)) return false;
+  markOrb2(itCurseAnimosity);
+  return true;
+  }
+
 EX bool markOrb2(eItem it) {
   return markOrb(it);
   /* if(!items[it]) return false;

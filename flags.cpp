@@ -317,13 +317,13 @@ EX bool survivesFall(eMonster m) {
 EX bool checkOrb(eMonster m1, eItem orb) {
   if(m1 == moPlayer) return markOrb(orb);
   if(isFriendly(m1)) return markEmpathy(orb);
-  return false;
+  return markAnimosity(orb);
   }
 
 EX bool checkOrb2(eMonster m1, eItem orb) {
   if(m1 == moPlayer) return markOrb2(orb);
   if(isFriendly(m1)) return markEmpathy2(orb);
-  return false;
+  return markAnimosity2(orb);
   }
 
 EX bool ignoresSmell(eMonster m) {

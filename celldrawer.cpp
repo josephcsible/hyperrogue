@@ -825,7 +825,7 @@ void celldrawer::draw_wall() {
 void celldrawer::draw_boat() {
   double footphase;
   if(WDIM == 3 && c == cwt.at && hide_player()) return;
-  bool magical = items[itOrbWater] && (isPlayerOn(c) || (isFriendly(c) && items[itOrbEmpathy]));
+  bool magical = items[itOrbWater] && (isPlayerOn(c) || (c->monst != moNone && (items[isFriendly(c) ? itOrbEmpathy : itCurseAnimosity])));
   int outcol = magical ? watercolor(0) : 0xC06000FF;
   int incol = magical ? 0x0060C0FF : 0x804000FF;
   bool nospin = false;

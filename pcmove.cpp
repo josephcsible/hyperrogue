@@ -1631,11 +1631,11 @@ EX void afterplayermoved() {
   }
 
 EX void produceGhost(cell *c, eMonster victim, eMonster who) {
-  if(who != moPlayer && !items[itOrbEmpathy]) return;
+  if(who != moPlayer && !items[isFriendly(who) ? itOrbEmpathy : itCurseAnimosity]) return;
   if(markOrb(itOrbUndeath) && !c->monst && isGhostable(victim)) {
     changes.ccell(c);
-    c->monst = moFriendlyGhost, c->stuntime = 0;
-    if(who != moPlayer) markOrb(itOrbEmpathy);
+    c->monst = isFriendlyOrPlayer(who) ? moFriendlyGhost : moGhost, c->stuntime = 0;
+    if(who != moPlayer) markOrb(isFriendly(who) ? itOrbEmpathy : itCurseAnimosity);
     }
   }
 
@@ -1720,7 +1720,7 @@ EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb, cell 
     markOrb(orb);
     changes.ccell(mt);
     plague_particles();
-    if(who != moPlayer) markOrb(itOrbEmpathy);
+    if(who != moPlayer) markOrb(isFriendly(who) ? itOrbEmpathy : itCurseAnimosity);
     int kk = 0;
     if(orb == itOrbPlague) kk = tkills();
     if(attackMonster(mt, AF_NORMAL | f | AF_MSG, who) || isAnyIvy(m)) {
@@ -1739,7 +1739,7 @@ EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb, cell 
     spread_plague(mf, mt, dir, who);
     hit_anything = true;
     }
-  else if(mt->wall == waShrub && markEmpathy(itOrbSlaying)) {
+  else if(mt->wall == waShrub && (isFriendly(who) ? markEmpathy(itOrbSlaying) : markAnimosity(itOrbSlaying))) {
     changes.ccell(mt);
     plague_particles();
     markOrb(orb);
@@ -1763,7 +1763,7 @@ EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb, cell 
 
 EX void sideAttack(cell *mf, int dir, eMonster who, int bonus, eItem orb) {
   if(!items[orb]) return;
-  if(who != moPlayer && !items[itOrbEmpathy]) return;
+  if(who != moPlayer && !items[isFriendly(who) ? itOrbEmpathy : itCurseAnimosity]) return;
   for(int k: {-1, 1}) {
     int dir1 = dir + k*bonus;
     dir1 = mf->c.fix(dir1);

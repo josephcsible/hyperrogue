@@ -435,9 +435,9 @@ EX namespace inv {
     "several quests and lands "
     "give you extremely powerful Orbs of the Mirror.\n";
 
-  void evokeBeautyAt(cell *c) {
+  void evokeBeautyAt(cell *c, bool affectFriends) {
     forCellEx(c2, c)
-      if(c2->monst && !isFriendly(c2->monst) && !isIvy(c2->monst)) {
+      if(c2->monst && isFriendly(c2->monst) == affectFriends && !isIvy(c2->monst)) {
         c2->stuntime += 3;
         checkStunKill(c2);
         }
@@ -449,12 +449,17 @@ EX namespace inv {
         checkFreedom(pc);
     
     if(it == itOrbBeauty) {
-      for(cell *pc: player_positions()) 
-          evokeBeautyAt(pc);
-      if(items[itOrbEmpathy])
-        for(cell *c: dcal) if(isFriendly(c->monst))
-          evokeBeautyAt(c);
+      if(items[itCurseAnimosity]) {
+        if(!items[itOrbEmpathy]) for(cell *c: dcal) if(!isFriendly(c->monst))
+          evokeBeautyAt(c, true);
+      } else {
+        for(cell *pc: player_positions()) 
+            evokeBeautyAt(pc, false);
+        if(items[itOrbEmpathy])
+          for(cell *c: dcal) if(isFriendly(c->monst))
+            evokeBeautyAt(c, false);
       }
+    }
     
     if(it == itOrbDigging) {
       forCellCM(c2, cwt.at) {

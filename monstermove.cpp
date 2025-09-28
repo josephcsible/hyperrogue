@@ -118,13 +118,20 @@ EX void moveEffect(const movei& mi, eMonster m) {
   }
 
 EX void check_beauty(cell *ct, cell *cf, eMonster m) {
+  if(items[itOrbEmpathy] && items[itCurseAnimosity]) return;
+
   bool adj = false;
-  if(ct->cpdist == 1 && (items[itOrb37] || !nonAdjacent(cf,ct)) && markOrb(itOrbBeauty) && !isFriendly(ct))
+  if(ct->cpdist == 1 && (items[itOrb37] || !nonAdjacent(cf,ct)) && markOrb(itOrbBeauty) && !isFriendly(ct) && !markOrb(itCurseAnimosity))
     adj = true;
 
   if(!adj && items[itOrbEmpathy] && items[itOrbBeauty] && !isFriendly(ct)) {
     for(int i=0; i<ct->type; i++) if(ct->move(i) && isFriendly(ct->move(i)))
       adj = true, markOrb(itOrbEmpathy), markOrb(itOrbBeauty);
+    }
+
+  if(!adj && items[itCurseAnimosity] && items[itOrbBeauty] && isFriendly(ct)) {
+    for(int i=0; i<ct->type; i++) if(ct->move(i) && !isFriendly(ct->move(i)))
+      adj = true, markOrb(itCurseAnimosity), markOrb(itOrbBeauty);
     }
 
   if(adj && ct->stuntime == 0 && !isMimic(m)) {

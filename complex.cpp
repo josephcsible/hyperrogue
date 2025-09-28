@@ -232,7 +232,7 @@ EX namespace elec {
     if(c->wall == waChasm)
       return ecIsolator;
 
-    if(shmup::on ? isPlayerOn(c) : (isPlayerOn(c) || (items[itOrbEmpathy] && isFriendly(c)))) {
+    if(shmup::on ? isPlayerOn(c) : (isPlayerOn(c) || items[isFriendly(c) ? itOrbEmpathy : itCurseAnimosity])) {
       if(items[itOrbShield]) return ecIsolator;
       if(afterOrb) return ecIsolator;
       if(!items[itOrbAether]) return isElectricLand(c) ? ecConductor : ecGrounded;
@@ -2417,6 +2417,8 @@ EX void livecaves() {
         if(c2->cpdist == 0 && markOrb(itOrbDigging)) hv+=100;
         if(items[itOrbEmpathy] && isFriendly(c2) && markEmpathy(itOrbDigging))
           hv+=100;
+        if(items[itCurseAnimosity] && !isFriendly(c2) && markAnimosity(itOrbDigging))
+          hv+=100;
         if(w == waThumperOn) hv+=100;
         if(w == waFire) hv+=100;
         if(w == waBigStatue) hv-=100;
@@ -2472,6 +2474,8 @@ EX void livecaves() {
         if(isPlayerOn(c2) && markOrb(itOrbDigging))
           hv -= 1000;
         if(items[itOrbEmpathy] && isFriendly(c2) && markEmpathy(itOrbDigging))
+          hv -= 1000;
+        if(items[itCurseAnimosity] && !isFriendly(c2) && markAnimosity(itOrbDigging))
           hv -= 1000;
 
         if(c2->wall == waBarrier) {

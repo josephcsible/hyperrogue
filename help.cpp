@@ -429,16 +429,16 @@ EX string generateHelpForItem(eItem it) {
   if(it == itOrbRecall)
     help += XLAT("\n\nOther active orbs extend the duration of this orb.");
 
-  if(it == itOrbEmpathy) {
+  if(among(it, itOrbEmpathy, itCurseAnimosity)) {
     int cnt = 0;
     for(int i=0; i<ittypes; i++) {
       eItem it2 = eItem(i);
-      if(isEmpathyOrb(it2)) {
+      if((it == itOrbEmpathy || it2 != itOrbSpeed) && isEmpathyOrb(it2)) {
         help += cnt ? XLAT(", %1", it2) : XLAT(" %1", it2);
         cnt++;
         }
       }
-    help += XLAT("\n\nAdditionally, your allies are protected from your indirect attacks.");
+    if(it == itOrbEmpathy) help += XLAT("\n\nAdditionally, your allies are protected from your indirect attacks.");
     }
 
 #if CAP_INV  
