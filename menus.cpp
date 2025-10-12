@@ -310,6 +310,16 @@ EX void switchHardcore() {
   if(pureHardcore()) popScreenAll();
   }
 
+EX void switchEnemyDebt() {
+  if(enemydebt) {
+      enemydebt = false;
+      addMessage(XLAT("Enemy debt off!"));
+  } else {
+      enemydebt = true;
+      addMessage(XLAT("Enemy debt on!"));
+  }
+}
+
 EX void switch_casual() {
   if(savecount > 0) {
     dialog::push_confirm_dialog([] {
@@ -778,6 +788,9 @@ EX void showChangeMode() {
     }
   if(getcstat == 'h')
     mouseovers = XLAT("One wrong move and it is game over!");
+
+  dialog::addSelItem(XLAT("enemy debt"), ONOFF(enemydebt), 'd');
+  dialog::add_action(switchEnemyDebt);
   
   multi::cpid = 0;
   menuitem_land_structure('l');

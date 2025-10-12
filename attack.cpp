@@ -61,6 +61,11 @@ int* killtable[] = {
     NULL
     };
 
+EX bool onkilltable(int *p) {
+  for(int i=0; killtable[i]; i++) if(killtable[i] == p) return true;
+  return false;
+  }
+
 EX int tkills() {
   int res = 0;
   for(int i=0; killtable[i]; i++) res += killtable[i][0];
@@ -90,6 +95,8 @@ EX bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) 
   if(!m2) return false;
   
   if(m2 == moPlayer && peace::on) return false;
+
+  if(enemydebt && onkilltable(&kills[m2]) && tkills() >= gold() && !attackJustStuns(c2, flags, m1) && !(m2 == moMirrorSpirit && m1 != moMimic && !(flags & (AF_MAGIC | AF_CRUSH)))) return false;
 
   if((flags & AF_WEAK) && isIvy(c2)) return false;
 

@@ -48,6 +48,8 @@ EX int  cheater = 0;
 /** \brief lands visited -- unblock some modes */
 EX bool landvisited[landtypes];
 
+EX bool enemydebt = false;
+
 EX int noiseuntil; // noise until the given turn
 
 EX void createNoise(int t) { 
@@ -955,6 +957,8 @@ void pcmove::tell_why_cannot_attack() {
     addMessage(XLAT("You cannot attack your own mount!"));
   else if(checkOrb(c2->monst, itOrbShield))
     addMessage(XLAT("A magical shield protects %the1!", c2->monst));
+  else if(enemydebt && onkilltable(&kills[c2->monst]) && tkills() >= gold() && !attackJustStuns(c2, attackflags, moPlayer) && !(c2->monst == moMirrorSpirit && !(attackflags & (AF_MAGIC | AF_CRUSH))))
+    addMessage(XLAT("Your score is too low to kill any more monsters!"));
   else if(bow::crossbow_mode() && !bow::bump_to_shoot)
     addMessage(XLAT("You have no melee weapon!"));
   else if(bow::crossbow_mode() && items[itCrossbow])
